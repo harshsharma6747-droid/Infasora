@@ -3,219 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G-GHOST OMNI-SYNC V80</title>
+    <title>G-GHOST OMNI-REAPER</title>
     <style>
-        :root { --glow: #bc13fe; --bg: #050505; --cyan: #00f2ff; --shadow: #ff4444; }
-        body { background: var(--bg); color: white; font-family: 'Courier New', monospace; margin: 0; padding: 10px; padding-bottom: 200px; }
+        :root { --glow: #bc13fe; --bg: #050505; --cyan: #00f2ff; --shadow: #444; }
+        body { background: var(--bg); color: white; font-family: 'Courier New', monospace; margin: 0; padding: 15px; overflow-x: hidden; }
         
-        /* UI Header */
-        .header { text-align: center; color: var(--glow); font-size: 1.4rem; text-shadow: 0 0 10px var(--glow); padding: 15px 0; }
-        .nav-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 15px; }
-        .tab { padding: 10px; text-align: center; background: #111; border: 1px solid #222; border-radius: 5px; cursor: pointer; font-size: 12px; }
-        .tab.active { border-color: var(--glow); color: var(--glow); background: #1a1a1a; box-shadow: inset 0 0 10px rgba(188,19,254,0.2); }
-        .tab.shadow-tab.active { border-color: var(--shadow); color: var(--shadow); }
-
-        /* Stats Bar */
-        .stats { display: flex; justify-content: space-between; background: #111; padding: 10px; border-radius: 8px; font-size: 10px; margin-bottom: 15px; border: 1px solid #222; }
-        .stats span { color: var(--cyan); }
-
-        /* Grid System */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
-        .asset-card { background: #111; border: 1px solid #222; border-radius: 8px; overflow: hidden; position: relative; }
-        .asset-card img { width: 100%; display: block; opacity: 0.8; }
-        .asset-card.new { border-color: var(--cyan); }
-        .asset-card.shadowed { border-color: var(--shadow); }
-        .manual-dl { position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.8); border: 1px solid var(--glow); color: var(--glow); padding: 4px; font-size: 9px; border-radius: 4px; }
-
-        /* Floating Controls */
-        .controls { position: fixed; bottom: 15px; left: 10px; right: 10px; background: rgba(10,10,10,0.95); border: 2px solid var(--glow); border-radius: 15px; padding: 15px; backdrop-filter: blur(10px); z-index: 1000; }
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .btn { padding: 12px; border: none; font-weight: bold; border-radius: 8px; cursor: pointer; font-family: monospace; font-size: 11px; }
-        .btn-start { background: var(--glow); color: #000; }
-        .btn-stop { background: var(--shadow); color: #fff; }
-        .btn-fld { background: #222; color: var(--cyan); border: 1px solid #444; }
+        .header { text-align: center; color: var(--glow); font-size: 1.4rem; text-shadow: 0 0 10px var(--glow); margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 10px; }
         
-        #log { font-size: 9px; color: #666; text-align: center; margin-top: 10px; height: 12px; overflow: hidden; }
-        .hidden { display: none; }
+        /* Stats & Pulse */
+        .stat-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .stat-box { background: #111; padding: 10px; border-radius: 8px; border: 1px solid #222; text-align: center; font-size: 10px; }
+        .stat-val { display: block; font-size: 16px; font-weight: bold; margin-top: 4px; }
+        
+        /* Main Feed */
+        .section-title { font-size: 12px; color: var(--glow); margin: 20px 0 10px; display: flex; justify-content: space-between; align-items: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+        .card { background: #111; border: 1px solid #222; border-radius: 8px; overflow: hidden; position: relative; }
+        .card img { width: 100%; display: block; opacity: 0.6; transition: 0.3s; }
+        .card.active { border-color: var(--cyan); box-shadow: 0 0 8px rgba(0, 242, 255, 0.2); }
+        .card.active img { opacity: 1; }
+        
+        /* Shadow Bucket */
+        .shadow-bucket { background: #0a0a0a; border: 1px dashed var(--shadow); border-radius: 12px; padding: 15px; margin-top: 30px; }
+        .shadow-card { display: flex; align-items: center; background: #111; margin-bottom: 8px; padding: 8px; border-radius: 6px; border-left: 3px solid var(--shadow); }
+        .shadow-card img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; margin-right: 12px; }
+        .shadow-info { flex: 1; font-size: 10px; overflow: hidden; }
+        
+        /* Controls */
+        .controls { position: fixed; bottom: 20px; left: 20px; right: 20px; z-index: 1000; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-family: monospace; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .btn-auto { background: var(--glow); color: #000; }
+        .btn-auto.active { background: #00ff00; box-shadow: 0 0 20px rgba(0,255,0,0.4); }
+        .btn-manual { background: var(--shadow); color: white; margin-top: 8px; font-size: 11px; }
+
+        #log { font-size: 9px; color: #666; text-align: center; margin-top: 10px; height: 12px; }
+        .badge { font-size: 9px; background: #222; padding: 2px 5px; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-<div class="header">🛰️ OMNI-SYNC NEBULA</div>
+<div class="header">🛰️ OMNI-REAPER V74</div>
 
-<div class="nav-tabs">
-    <div id="tab-live" class="tab active" onclick="switchTab('live')">LIVE FEED</div>
-    <div id="tab-shadow" class="tab shadow-tab" onclick="switchTab('shadow')">SHADOW BUCKET</div>
+<div class="stat-bar">
+    <div class="stat-box">VAULTED<span class="stat-val" id="count-vault">0</span></div>
+    <div class="stat-box" style="color:var(--cyan)">HARVESTED<span class="stat-val" id="count-dl">0</span></div>
+    <div class="stat-box" style="color:var(--shadow)">SHADOW<span class="stat-val" id="count-shadow">0</span></div>
 </div>
 
-<div class="stats">
-    <div>VAULT: <span id="fld-name">DEFAULT</span></div>
-    <div>LOGGED: <span id="count-sync">0</span></div>
-    <div>SHADOW: <span id="count-shadow" style="color:var(--shadow)">0</span></div>
+<div class="section-title">ACTIVE HARVEST QUEUE <span class="badge" id="sync-status">IDLE</span></div>
+<div class="grid" id="activeGrid"></div>
+
+<div class="shadow-bucket">
+    <div class="section-title" style="color:var(--shadow); margin-top:0;">SHADOW BUCKET (MANUAL REVIEW)</div>
+    <div id="shadowList"></div>
 </div>
 
-<div id="live-view" class="grid"></div>
-<div id="shadow-view" class="grid hidden"></div>
+<div id="log">INITIALIZING NEBULA PROTOCOL...</div>
 
 <div class="controls">
-    <div style="display:flex; gap:5px; margin-bottom:10px;">
-        <input type="text" id="rename-tag" placeholder="Prefix..." style="flex:1; background:#000; border:1px solid #333; color:var(--cyan); padding:8px; border-radius:5px; font-size:12px;">
-        <button class="btn btn-fld" onclick="changeFolder()">FOLDER</button>
-    </div>
-    <div class="btn-group">
-        <button id="engine-toggle" class="btn btn-start" onclick="toggleEngine()">START AUTO-SYNC</button>
-        <button class="btn btn-fld" onclick="refreshData()">FORCE REFRESH</button>
-    </div>
-    <div id="log">STANDBY // SYSTEM READY</div>
+    <button class="btn btn-auto" id="autoBtn" onclick="toggleAuto()">START AUTO-REAPER</button>
+    <button class="btn btn-manual" onclick="refresh()">FORCE SYNC DATA</button>
 </div>
 
 <script>
     const CONFIG = {
-        FB_BASE: "https://bomb-aa638-default-rtdb.firebaseio.com/thumb_vault/assets",
-        folder: localStorage.getItem('ghost_folder') || "default"
+        FB_BASE: "https://bomb-aa638-default-rtdb.firebaseio.com/sora_vault/assets",
+        LOCAL_KEY: "G_GHOST_HARVESTED_V1"
     };
 
     let vault = [];
-    let history = JSON.parse(localStorage.getItem('ghost_history') || '[]');
-    let shadow = JSON.parse(localStorage.getItem('ghost_shadow') || '[]');
-    let isRunning = false;
-    let currentTab = 'live';
+    let harvested = JSON.parse(localStorage.getItem(CONFIG.LOCAL_KEY) || "[]");
+    let isAuto = false;
+    let isProcessing = false;
 
-    // 1. Sync & Refresh
-    async function refreshData() {
-        writeLog("POLLING FIREBASE...");
+    // Refresh & Sync
+    async function refresh() {
+        const logEl = document.getElementById('log');
+        document.getElementById('sync-status').innerText = "SYNCING...";
+        
         try {
-            const res = await fetch(`${CONFIG.FB_BASE}/${CONFIG.folder}.json?nocache=${Date.now()}`);
+            const res = await fetch(`${CONFIG.FB_BASE}.json?nocache=${Date.now()}`);
             const data = await res.json();
             vault = data ? Object.values(data) : [];
-            processAssets();
-        } catch(e) { writeLog("SYNC ERROR"); }
+            render();
+            logEl.innerText = "DATABASE SYNCED // SCANNING FOR NEW ASSETS";
+            document.getElementById('sync-status').innerText = "LIVE";
+        } catch(e) {
+            logEl.innerText = "SYNC FAILED // CHECK CONNECTION";
+        }
     }
 
-    function processAssets() {
-        const liveGrid = document.getElementById('live-view');
-        const shadowGrid = document.getElementById('shadow-view');
-        liveGrid.innerHTML = '';
-        shadowGrid.innerHTML = '';
+    function render() {
+        const activeGrid = document.getElementById('activeGrid');
+        const shadowList = document.getElementById('shadowList');
+        activeGrid.innerHTML = '';
+        shadowList.innerHTML = '';
 
         let shadowCount = 0;
-        let syncCount = 0;
+        let dlCount = 0;
 
         vault.forEach(item => {
-            const isDownloaded = history.includes(item.id);
-            const isShadowed = shadow.includes(item.id);
-
-            const card = document.createElement('div');
-            card.className = `asset-card ${isShadowed ? 'shadowed' : ''}`;
-            card.innerHTML = `<img src="${item.thumb}">`;
-
-            if (isShadowed) {
-                card.innerHTML += `<div class="manual-dl" onclick="manualDL('${item.thumb}', '${item.id}')">MANUAL</div>`;
-                shadowGrid.appendChild(card);
-                shadowCount++;
+            const isDownloaded = harvested.includes(item.url);
+            
+            if (!isDownloaded) {
+                // If it exists but hasn't been downloaded, it's in the Active Queue
+                const card = document.createElement('div');
+                card.className = 'card active';
+                card.innerHTML = `<img src="${item.thumb || ''}" onerror="this.src='https://via.placeholder.com/150/111/bc13fe?text=NO+THUMB'">`;
+                activeGrid.appendChild(card);
             } else {
-                if (!isDownloaded) card.classList.add('new');
-                liveGrid.appendChild(card);
-                if (isDownloaded) syncCount++;
+                dlCount++;
             }
+
+            // Populate Shadow Bucket with items that might need manual intervention or re-download
+            const shadowCard = document.createElement('div');
+            shadowCard.className = 'shadow-card';
+            shadowCard.innerHTML = `
+                <img src="${item.thumb || ''}">
+                <div class="shadow-info">
+                    ID: ${item.url.slice(-8)}...<br>
+                    ${isDownloaded ? '<span style="color:var(--cyan)">[REAPED]</span>' : '<span style="color:var(--shadow)">[PENDING]</span>'}
+                </div>
+                <button onclick="manualDL('${item.thumb}', '${item.url}')" style="background:none; border:1px solid #333; color:white; font-size:9px; padding:5px;">DL</button>
+            `;
+            shadowList.appendChild(shadowCard);
+            if (!isDownloaded) shadowCount++;
         });
 
-        document.getElementById('count-sync').innerText = syncCount;
+        document.getElementById('count-vault').innerText = vault.length;
+        document.getElementById('count-dl').innerText = dlCount;
         document.getElementById('count-shadow').innerText = shadowCount;
-        document.getElementById('fld-name').innerText = CONFIG.folder.toUpperCase();
     }
 
-    // 2. The Auto-Engine
-    async function toggleEngine() {
-        isRunning = !isRunning;
-        const btn = document.getElementById('engine-toggle');
-        btn.innerText = isRunning ? "STOP AUTO-SYNC" : "START AUTO-SYNC";
-        btn.className = isRunning ? "btn btn-stop" : "btn btn-start";
-        if(isRunning) autoEngine();
+    async function toggleAuto() {
+        isAuto = !isAuto;
+        const btn = document.getElementById('autoBtn');
+        btn.innerText = isAuto ? "REAPER ACTIVE" : "START AUTO-REAPER";
+        btn.classList.toggle('active', isAuto);
+        if (isAuto) reaperLoop();
     }
 
-    async function autoEngine() {
-        if(!isRunning) return;
+    async function reaperLoop() {
+        if (!isAuto || isProcessing) return;
+        isProcessing = true;
 
-        // Auto-Refresh check
-        await refreshData();
+        // Find the first non-downloaded item
+        const target = vault.find(item => !harvested.includes(item.url));
 
-        // Identify next target (In vault, not in history, not in shadow)
-        const target = vault.find(item => !history.includes(item.id) && !shadow.includes(item.id));
-
-        if(target) {
-            writeLog(`DOWNLOADING: ${target.id}`);
-            const success = await triggerDownload(target.thumb, target.id);
+        if (target && target.clean) {
+            document.getElementById('log').innerText = `REAPING: ${target.url.slice(-8)}`;
+            const success = await triggerDownload(target.clean, `Sora_${Date.now()}.mp4`);
             
-            if(success) {
-                history.push(target.id);
-                localStorage.setItem('ghost_history', JSON.stringify(history));
-                writeLog(`SUCCESS: ${target.id}`);
-            } else {
-                shadow.push(target.id);
-                localStorage.setItem('ghost_shadow', JSON.stringify(shadow));
-                writeLog(`SHADOWED: ${target.id}`);
+            if (success) {
+                harvested.push(target.url);
+                localStorage.setItem(CONFIG.LOCAL_KEY, JSON.stringify(harvested));
+                render();
             }
-            processAssets();
-        } else {
-            writeLog("QUEUE CLEAR // SLEEPING");
         }
 
-        setTimeout(autoEngine, 4000);
+        isProcessing = false;
+        setTimeout(reaperLoop, 3000); // 3 second stagger for Android stability
     }
 
-    // 3. Download Logic
-    async function triggerDownload(url, id) {
+    async function triggerDownload(url, filename) {
         try {
-            const prefix = document.getElementById('rename-tag').value || CONFIG.folder;
             const res = await fetch(url);
             const blob = await res.blob();
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `${prefix}_${id}.jpg`;
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
             return true;
         } catch(e) {
+            console.error("Download blocked or failed", e);
             return false;
         }
     }
 
-    function manualDL(url, id) {
-        triggerDownload(url, id);
-        // Move from shadow to history after manual attempt
-        shadow = shadow.filter(sid => sid !== id);
-        history.push(id);
-        localStorage.setItem('ghost_shadow', JSON.stringify(shadow));
-        localStorage.setItem('ghost_history', JSON.stringify(history));
-        processAssets();
-    }
-
-    // 4. Navigation & Utility
-    function switchTab(t) {
-        currentTab = t;
-        document.getElementById('live-view').classList.toggle('hidden', t !== 'live');
-        document.getElementById('shadow-view').classList.toggle('hidden', t !== 'shadow');
-        document.getElementById('tab-live').classList.toggle('active', t === 'live');
-        document.getElementById('tab-shadow').classList.toggle('active', t === 'shadow');
-    }
-
-    function changeFolder() {
-        const n = prompt("Target Folder Name:", CONFIG.folder);
-        if(n) {
-            CONFIG.folder = n.replace(/[^a-z0-9]/gi, '_');
-            localStorage.setItem('ghost_folder', CONFIG.folder);
-            refreshData();
+    function manualDL(thumb, url) {
+        const item = vault.find(i => i.url === url);
+        if (item && item.clean) {
+            triggerDownload(item.clean, `Manual_${Date.now()}.mp4`);
+            if (!harvested.includes(url)) {
+                harvested.push(url);
+                localStorage.setItem(CONFIG.LOCAL_KEY, JSON.stringify(harvested));
+                render();
+            }
+        } else {
+            alert("Clean video link missing in Vault!");
         }
     }
 
-    function writeLog(m) { document.getElementById('log').innerText = `// ${m}`; }
-
-    // Initial Start
-    refreshData();
-    // Auto-refresh every 30 seconds even if engine is off
-    setInterval(refreshData, 30000);
+    // Auto-Sync every 10 seconds
+    setInterval(refresh, 10000);
+    refresh();
 </script>
 </body>
 </html>
